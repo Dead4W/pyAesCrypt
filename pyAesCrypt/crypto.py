@@ -269,7 +269,6 @@ def decryptFile(infile, outfile, passw, bufferSize):
                         # decrypt file stream
                         decryptStream(fIn, fOut, passw, bufferSize,
                                       inputFileSize)
-                        rename(outfile_tmp, outfile)
                     except ValueError as exd:
                         # should not remove output file here because it is still in use
                         # re-raise exception
@@ -282,6 +281,8 @@ def decryptFile(infile, outfile, passw, bufferSize):
                 remove(outfile_tmp)
                 # re-raise exception
                 raise ValueError(str(exd))
+            else:
+                rename(outfile_tmp, outfile)
                 
     except IOError:
         raise IOError("File \"" + infile + "\" was not found.")
