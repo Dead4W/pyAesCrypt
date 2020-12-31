@@ -121,29 +121,69 @@ class TestEncDec(unittest.TestCase):
             os.remove(ou)
         # delete directory for test files
         os.rmdir(tfdirname)
-    
+
     # test pyAesCrypt encryption/decryption
-    def test_enc_pyAesCrypt_dec_pyAesCrypt(self):
+    def test_enc_pyAesCrypt_v0_dec_pyAesCrypt(self):
         for pt, ct, ou in zip(filenames, encfilenames, decfilenames):
             # encrypt file
-            pyAesCrypt.encryptFile(pt, ct, password, bufferSize)
+            pyAesCrypt.encryptFile(pt, ct, password, bufferSize, file_version=0)
+            # decrypt file
+            pyAesCrypt.decryptFile(ct, ou, password, bufferSize)
+            # check that the original file and the output file are equal
+            self.assertTrue(filecmp.cmp(pt, ou))
+
+    # test pyAesCrypt encryption/decryption
+    def test_enc_pyAesCrypt_v1_dec_pyAesCrypt(self):
+        for pt, ct, ou in zip(filenames, encfilenames, decfilenames):
+            # encrypt file
+            pyAesCrypt.encryptFile(pt, ct, password, bufferSize, file_version=1)
+            # decrypt file
+            pyAesCrypt.decryptFile(ct, ou, password, bufferSize)
+            # check that the original file and the output file are equal
+            self.assertTrue(filecmp.cmp(pt, ou))
+
+    # test pyAesCrypt encryption/decryption
+    def test_enc_pyAesCrypt_v2_dec_pyAesCrypt(self):
+        for pt, ct, ou in zip(filenames, encfilenames, decfilenames):
+            # encrypt file
+            pyAesCrypt.encryptFile(pt, ct, password, bufferSize, file_version=2)
             # decrypt file
             pyAesCrypt.decryptFile(ct, ou, password, bufferSize)
             # check that the original file and the output file are equal
             self.assertTrue(filecmp.cmp(pt, ou))
             
     # test encryption with pyAesCrypt and decryption with AES Crypt
-    def test_enc_pyAesCrypt_dec_AesCrypt(self):
+    def test_enc_pyAesCrypt_v0_dec_AesCrypt(self):
         for pt, ct, ou in zip(filenames, encfilenames, decfilenames):
             # encrypt file
-            pyAesCrypt.encryptFile(pt, ct, password, bufferSize)
+            pyAesCrypt.encryptFile(pt, ct, password, bufferSize, file_version=0)
+            # decrypt file
+            subprocess.call(["aescrypt", "-d", "-p", password, "-o", ou, ct])
+            # check that the original file and the output file are equal
+            self.assertTrue(filecmp.cmp(pt, ou))
+
+    # test encryption with pyAesCrypt and decryption with AES Crypt
+    def test_enc_pyAesCrypt_v1_dec_AesCrypt(self):
+        for pt, ct, ou in zip(filenames, encfilenames, decfilenames):
+            # encrypt file
+            pyAesCrypt.encryptFile(pt, ct, password, bufferSize, file_version=1)
+            # decrypt file
+            subprocess.call(["aescrypt", "-d", "-p", password, "-o", ou, ct])
+            # check that the original file and the output file are equal
+            self.assertTrue(filecmp.cmp(pt, ou))
+
+    # test encryption with pyAesCrypt and decryption with AES Crypt
+    def test_enc_pyAesCrypt_v2_dec_AesCrypt(self):
+        for pt, ct, ou in zip(filenames, encfilenames, decfilenames):
+            # encrypt file
+            pyAesCrypt.encryptFile(pt, ct, password, bufferSize, file_version=2)
             # decrypt file
             subprocess.call(["aescrypt", "-d", "-p", password, "-o", ou, ct])
             # check that the original file and the output file are equal
             self.assertTrue(filecmp.cmp(pt, ou))
             
     # test encryption with AES Crypt and decryption with pyAesCrypt
-    def test_enc_AesCrypt_dec_pyAesCrypt(self):
+    def test_enc_AesCrypt_v2_dec_pyAesCrypt(self):
         for pt, ct, ou in zip(filenames, encfilenames, decfilenames):
             # encrypt file
             subprocess.call(["aescrypt", "-e", "-p", password, "-o", ct, pt])
@@ -261,6 +301,18 @@ class TestExceptions(unittest.TestCase):
         
         # check that decrypted file was not created
         self.assertFalse(isfile(self.tfile + '.decr'))
+
+    # test decryption of an unsupported version of AES Crypt format
+    def test_enc_unsupported_AesCrypt_format(self):
+        # try to encrypt file
+        # ...and check that ValueError is raised
+        self.assertRaisesRegex(ValueError, ("Unsupported file format version, "
+                                            "please set version to 0, 1 or 2"),
+                               pyAesCrypt.encryptFile, self.tfile,
+                               self.tfile + '.aes', password, bufferSize, 3333)
+
+        # check that decrypted file was not created
+        self.assertFalse(isfile(self.tfile + '.aes'))
             
     # test decryption of an unsupported version of AES Crypt format
     def test_dec_unsupported_AesCrypt_format(self):
@@ -269,11 +321,11 @@ class TestExceptions(unittest.TestCase):
                                bufferSize)
         # corrupt the 4th byte
         corruptFile(self.tfile+'.aes', 3)
-        
+
         # try to decrypt file
         # ...and check that ValueError is raised
         self.assertRaisesRegex(ValueError, ("pyAesCrypt is only "
-                                                "compatible with version 2 of "
+                                                "compatible with version 1,2,3 of "
                                                 "the AES Crypt file format."),
                                pyAesCrypt.decryptFile, self.tfile + '.aes',
                                self.tfile + '.decr', password, bufferSize)
