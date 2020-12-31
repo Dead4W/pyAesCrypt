@@ -55,6 +55,8 @@ parser.add_argument("-o", "--out", type=str,
                     default=None, help="specify output file")
 parser.add_argument("-p", "--password", type=str,
                     default=None, help="specify the password")
+parser.add_argument("-v", "--version_file", type=int,
+                    default=2, help="specify the file version format (only encrypt)")
 
 # encrypt OR decrypt....
 groupED = parser.add_mutually_exclusive_group(required=True)
@@ -117,7 +119,7 @@ if args.encrypt:
 
     # call encryption function
     try:
-        pyAesCrypt.encryptFile(args.filename, ofname, passw, bufferSize)
+        pyAesCrypt.encryptFile(args.filename, ofname, passw, bufferSize, file_version=args.version_file)
     # handle IO errors
     except IOError as ex:
         exit(ex)
