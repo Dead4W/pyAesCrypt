@@ -7,9 +7,11 @@ pyAesCrypt
 
 About pyAesCrypt
 --------------------------
+**IMPORTANT: this branch compatibility with v0 and v1 file formats with security vulnerabilities**
+
 pyAesCrypt is a Python 3 file-encryption module and script that uses AES256-CBC to encrypt/decrypt files and binary streams.
 
-pyAesCrypt is compatible with the `AES Crypt`_ `file format`_ (version 2).
+pyAesCrypt is compatible with the `AES Crypt`_ `file format`_.
 
 It is Free Software, released under the `Apache License, Version 2.0`_.
 
@@ -31,7 +33,7 @@ Here is an example showing encryption and decryption of a file:
     bufferSize = 64 * 1024
     password = "foopassword"
     # encrypt
-    pyAesCrypt.encryptFile("data.txt", "data.txt.aes", password, bufferSize)
+    pyAesCrypt.encryptFile("data.txt", "data.txt.aes", password, bufferSize, file_version=2)
     # decrypt
     pyAesCrypt.decryptFile("data.txt.aes", "dataout.txt", password, bufferSize)
 
@@ -50,7 +52,7 @@ In case you need it, you can work with binary streams too:
     # encrypt
     with open("data.txt", "rb") as fIn:
         with open("data.txt.aes", "wb") as fOut:
-            pyAesCrypt.encryptStream(fIn, fOut, password, bufferSize)
+            pyAesCrypt.encryptStream(fIn, fOut, password, bufferSize, file_version=2)
     
     # get encrypted file size
     encFileSize = stat("data.txt.aes").st_size
@@ -88,7 +90,7 @@ you can also perform in-memory encryption/decryption (using BytesIO):
     fDec = io.BytesIO()
     
     # encrypt stream
-    pyAesCrypt.encryptStream(fIn, fCiph, password, bufferSize)
+    pyAesCrypt.encryptStream(fIn, fCiph, password, bufferSize, file_version=2)
     
     # print encrypted data
     print("This is the ciphertext:\n" + str(fCiph.getvalue()))
