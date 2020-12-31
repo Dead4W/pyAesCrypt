@@ -40,7 +40,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, hmac
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from os import urandom
-from os import stat, remove, path
+from os import stat, remove, path, rename
 
 # pyAesCrypt version
 version = "0.4.3"
@@ -79,6 +79,7 @@ def stretch(passw, iv1):
 #             using a larger buffer speeds up things when dealing
 #             with big files
 def encryptFile(infile, outfile, passw, bufferSize):
+    outfile_tmp = outfile + ".tmp"
     try:
         with open(infile, "rb") as fIn:
             # check that output file does not exist
@@ -89,13 +90,18 @@ def encryptFile(infile, outfile, passw, bufferSize):
                     raise ValueError("Input and output files "
                                      "are the same.")
             try:
-                with open(outfile, "wb") as fOut:
+                with open(outfile_tmp, "wb") as fOut:
                     # encrypt file stream
                     encryptStream(fIn, fOut, passw, bufferSize)
                 
             except IOError:
+                # remove tmp file on error
+                remove(outfile_tmp)
                 raise IOError("Unable to write output file.")
-            
+            else:
+                # rename tmp to origin output
+                rename(outfile_tmp, outfile)
+
     except IOError:
         raise IOError("File \"" + infile + "\" was not found.")
                 
@@ -245,6 +251,7 @@ def encryptStream(fIn, fOut, passw, bufferSize):
 #             using a larger buffer speeds up things when dealing with
 #             big files
 def decryptFile(infile, outfile, passw, bufferSize):
+    outfile_tmp = outfile + ".tmp"
     try:
         with open(infile, "rb") as fIn:
             # check that output file does not exist
@@ -255,7 +262,7 @@ def decryptFile(infile, outfile, passw, bufferSize):
                     raise ValueError("Input and output files "
                                      "are the same.")
             try:
-                with open(outfile, "wb") as fOut:
+                with open(outfile_tmp, "wb") as fOut:
                     # get input file size
                     inputFileSize = stat(infile).st_size
                     try:
@@ -271,9 +278,11 @@ def decryptFile(infile, outfile, passw, bufferSize):
                 raise IOError("Unable to write output file.")
             except ValueError as exd:
                 # remove output file on error
-                remove(outfile)
+                remove(outfile_tmp)
                 # re-raise exception
                 raise ValueError(str(exd))
+            else:
+                rename(outfile_tmp, outfile)
                 
     except IOError:
         raise IOError("File \"" + infile + "\" was not found.")
