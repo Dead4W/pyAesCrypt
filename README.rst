@@ -111,6 +111,12 @@ you can also perform in-memory encryption/decryption (using BytesIO):
 
 Script usage examples
 ------------------------
+Encrypt file test.txt in test.txt.aes for file format v0 or v1:
+
+	pyAesCrypt -v 0 -e test.txt
+
+	pyAesCrypt -v 1 -e test.txt
+
 Encrypt file test.txt in test.txt.aes:
 
 	pyAesCrypt -e test.txt
