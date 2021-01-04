@@ -1,5 +1,5 @@
 #==============================================================================
-# Copyright 2018 Marco Bellaccini - marco.bellaccini[at!]gmail.com
+# Copyright 2020 Marco Bellaccini - marco.bellaccini[at!]gmail.com
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ from os import urandom
 from os import stat, remove, path, rename
 
 # pyAesCrypt version
-version = "0.4.3"
+version = "0.4.4"
 
 # encryption/decryption buffer size - 64K
 bufferSize = 64 * 1024
