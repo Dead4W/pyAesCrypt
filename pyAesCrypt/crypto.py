@@ -412,10 +412,6 @@ def decryptStream(fIn, fOut, passw, bufferSize, inputLength):
     # remove padding
     toremove = ((16 - fs16[0]) % 16)
     if toremove != 0:
-        # check pad byte
-        if toremove != pText[-1]:
-            raise ValueError("File is corrupted.")
-
         pText = pText[:-toremove]
         
     # write decrypted data to output file
