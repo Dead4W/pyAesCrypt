@@ -415,7 +415,6 @@ def decryptStream(fIn, fOut, passw, bufferSize, inputLength):
         # check pad byte
         if toremove != pText[-1]:
             raise ValueError("File is corrupted.")
-        print(fs16)
 
         pText = pText[:-toremove]
         
